@@ -88,8 +88,10 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
 
   onConnect: (connection: Connection) => {
     const id = getId();
-    const existingEdgeCount = get().edges.length;
-    const connectionLabel = `C${existingEdgeCount + 1}`;
+    const edges = get().edges;
+    const conduitCount = edges.filter(e => e.data?.type === 'conduit').length;
+    const connectionLabel = `C${conduitCount + 1}`;
+
     set({
       edges: addEdge(
         {
@@ -164,14 +166,25 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
     set({
       edges: get().edges.map((edge) => {
         if (edge.id === id) {
-          const newData = { ...edge.data, ...data };
+          const oldType = edge.data?.type;
+          const newType = data.type || oldType;
+          let label = data.label || edge.data?.label;
+
+          // If type changed, recalculate label
+          if (data.type && data.type !== oldType) {
+            const sameTypeEdges = get().edges.filter(e => e.data?.type === data.type && e.id !== id);
+            const prefix = data.type === 'conduit' ? 'C' : 'D';
+            label = `${prefix}${sameTypeEdges.length + 1}`;
+          }
+
+          const newData = { ...edge.data, ...data, label };
           let style = edge.style;
           let markerEnd = edge.markerEnd;
 
-          if (data.type === 'conduit') {
+          if (newType === 'conduit') {
             style = { stroke: '#3b82f6', strokeWidth: 2 };
             markerEnd = { type: MarkerType.ArrowClosed, color: '#3b82f6' };
-          } else if (data.type === 'dummy') {
+          } else if (newType === 'dummy') {
             style = { stroke: '#94a3b8', strokeWidth: 2, strokeDasharray: '5,5' };
             markerEnd = { type: MarkerType.ArrowClosed, color: '#94a3b8' };
           }
