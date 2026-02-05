@@ -54,10 +54,6 @@ export function Toolbar({ onExport, onSave, onLoad }: { onExport: () => void, on
   const [selectedElementId, setSelectedElementId] = useState<string>("");
   const [selectedVars, setSelectedVars] = useState<string[]>([]);
 
-  const handleParamSave = () => {
-    updateComputationalParams(localParams);
-  };
-
   const handleAddRequest = () => {
     if (!selectedElementId || selectedVars.length === 0) return;
     
@@ -196,7 +192,11 @@ export function Toolbar({ onExport, onSave, onLoad }: { onExport: () => void, on
                     step="0.001"
                     className="col-span-3" 
                     value={localParams.dtcomp}
-                    onChange={e => setLocalParams({...localParams, dtcomp: parseFloat(e.target.value)})}
+                    onChange={e => {
+                      const val = parseFloat(e.target.value);
+                      setLocalParams({...localParams, dtcomp: val});
+                      updateComputationalParams({...localParams, dtcomp: val});
+                    }}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -207,7 +207,11 @@ export function Toolbar({ onExport, onSave, onLoad }: { onExport: () => void, on
                     step="0.01"
                     className="col-span-3" 
                     value={localParams.dtout}
-                    onChange={e => setLocalParams({...localParams, dtout: parseFloat(e.target.value)})}
+                    onChange={e => {
+                      const val = parseFloat(e.target.value);
+                      setLocalParams({...localParams, dtout: val});
+                      updateComputationalParams({...localParams, dtout: val});
+                    }}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -217,13 +221,14 @@ export function Toolbar({ onExport, onSave, onLoad }: { onExport: () => void, on
                     type="number" 
                     className="col-span-3" 
                     value={localParams.tmax}
-                    onChange={e => setLocalParams({...localParams, tmax: parseFloat(e.target.value)})}
+                    onChange={e => {
+                      const val = parseFloat(e.target.value);
+                      setLocalParams({...localParams, tmax: val});
+                      updateComputationalParams({...localParams, tmax: val});
+                    }}
                   />
                 </div>
               </div>
-              <DialogFooter>
-                <Button onClick={handleParamSave}>Save changes</Button>
-              </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
