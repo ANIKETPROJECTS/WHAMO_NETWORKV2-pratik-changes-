@@ -11,12 +11,15 @@ import {
   Upload, 
   MousePointer2,
   Settings2,
-  ListVideo
+  ListVideo,
+  Lock,
+  Unlock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNetworkStore } from '@/lib/store';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
