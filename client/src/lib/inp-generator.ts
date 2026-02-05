@@ -165,8 +165,11 @@ export function generateInpFile(nodes: WhamoNode[], edges: WhamoEdge[]) {
         ? nodes.find(n => n.id === req.elementId)
         : edges.find(e => e.id === req.elementId);
       
-      const label = element?.data?.label || element?.data?.nodeNumber || element?.id || req.elementId;
-      const typeStr = (req.elementType === 'node' && element?.data?.type !== 'surgeTank') ? 'NODE' : 'ELEM';
+      const isSurgeTank = req.elementType === 'node' && element?.data?.type === 'surgeTank';
+      const label = isSurgeTank 
+        ? (element?.data?.label || element?.id || req.elementId)
+        : (element?.data?.nodeNumber || element?.data?.label || element?.id || req.elementId);
+      const typeStr = isSurgeTank ? 'ELEM' : 'NODE';
       addL(` ${typeStr} ${label} ${req.variables.join(' ')}`);
     });
     addL(' FINISH');
