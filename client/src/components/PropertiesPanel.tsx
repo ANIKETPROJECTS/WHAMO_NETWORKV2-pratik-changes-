@@ -130,6 +130,29 @@ export function PropertiesPanel() {
                   onChange={(e) => handleChange('elevation', e.target.value)} 
                 />
               </div>
+              {element.data?.type === 'flowBoundary' && (
+                <>
+                  <div className="grid gap-2">
+                    <Label htmlFor="scheduleNum">Schedule Number</Label>
+                    <Input 
+                      id="scheduleNum" 
+                      type="number" 
+                      value={element.data?.scheduleNumber || 0} 
+                      onChange={(e) => handleChange('scheduleNumber', e.target.value)} 
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="scheduleData">Queue Schedule Data</Label>
+                    <Input 
+                      id="scheduleData" 
+                      placeholder="T 0 Q 3000 T 20 Q 0 ..."
+                      value={element.data?.scheduleData || ''} 
+                      onChange={(e) => handleChange('scheduleData', e.target.value)} 
+                    />
+                    <p className="text-[10px] text-muted-foreground">Format: T [time] Q [flow] ...</p>
+                  </div>
+                </>
+              )}
             </>
           )}
 

@@ -158,11 +158,14 @@ export function generateInpFile(nodes: WhamoNode[], edges: WhamoEdge[]) {
   addL('');
   addL('');
   addL('SCHEDULE');
-  // Mock schedules as per sample for now, or we could add UI for them later
-  addL(' QSCHEDULE 1 T 0 Q 3000 T 20 Q 0 T 3000 Q 0');
-  addL(' QSCHEDULE 2 T 0 Q 3000 T 20 Q 0 T 3000 Q 0');
-  addL(' QSCHEDULE 3 T 0 Q 3000 T 20 Q 0 T 3000 Q 0');
-  addL(' QSCHEDULE 4 T 0 Q 3000 T 20 Q 0 T 3000 Q 0');
+  
+  const flowBoundaries = nodes.filter(n => n.type === 'flowBoundary');
+  flowBoundaries.forEach(n => {
+    const d = n.data;
+    const schedule = d.scheduleData || 'T 0 Q 3000 T 20 Q 0 T 3000 Q 0';
+    addL(` QSCHEDULE ${d.scheduleNumber} ${schedule}`);
+  });
+  
   addL('');
   addL('FINISH');
   addL('');
