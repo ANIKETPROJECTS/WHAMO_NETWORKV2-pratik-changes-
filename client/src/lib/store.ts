@@ -193,7 +193,7 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
         if (edge.id === id) {
           const oldType = edge.data?.type;
           const newType = data.type || oldType;
-          let label = data.label || edge.data?.label;
+          let label = data.label || edge.data?.label || "";
 
           // If type changed, recalculate label
           if (data.type && data.type !== oldType) {
@@ -216,7 +216,7 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
 
           return { 
             ...edge, 
-            data: newData,
+            data: newData as EdgeData,
             style,
             markerEnd: markerEnd as any
           };

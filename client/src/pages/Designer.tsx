@@ -8,6 +8,8 @@ import {
   Connection,
   Edge,
   Node,
+  useReactFlow,
+  ReactFlowProvider
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { cn } from '@/lib/utils';
@@ -34,9 +36,10 @@ const edgeTypes = {
   connection: ConnectionEdge,
 };
 
-export default function Designer() {
+function DesignerInner() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
 
   // We connect local ReactFlow state to our global Zustand store for properties panel sync
   const { 
@@ -55,36 +58,54 @@ export default function Designer() {
     selectedElementType
   } = useNetworkStore();
 
+  const [isLocked, setIsLocked] = useState(false);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.key === 'Delete' || event.key === 'Backspace') && 
+      // Check if user is typing in an input
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Keyboard shortcuts for zoom and view
+      if (event.key === '+' || event.key === '=') {
+        zoomIn();
+      } else if (event.key === '-' || event.key === '_') {
+        zoomOut();
+      } else if (event.key.toLowerCase() === 'f') {
+        fitView();
+      } else if (event.key.toLowerCase() === 'l') {
+        setIsLocked(!isLocked);
+      } else if ((event.key === 'Delete' || event.key === 'Backspace') && 
           selectedElementId && 
-          selectedElementType && 
-          !(event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)) {
+          selectedElementType) {
         deleteElement(selectedElementId, selectedElementType);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [deleteElement, selectedElementId, selectedElementType]);
+  }, [deleteElement, selectedElementId, selectedElementType, zoomIn, zoomOut, fitView, isLocked]);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
+      if (isLocked) return;
       storeOnNodesChange(changes);
     },
-    [storeOnNodesChange]
+    [storeOnNodesChange, isLocked]
   );
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
+      if (isLocked) return;
       storeOnEdgesChange(changes);
     },
-    [storeOnEdgesChange]
+    [storeOnEdgesChange, isLocked]
   );
 
   const onConnect = useCallback(
     (params: Connection) => {
+      if (isLocked) return;
       if (params.source === params.target) {
         toast({
           variant: "destructive",
@@ -95,7 +116,7 @@ export default function Designer() {
       }
       storeOnConnect(params);
     },
-    [storeOnConnect, toast]
+    [storeOnConnect, toast, isLocked]
   );
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
@@ -215,22 +236,42 @@ export default function Designer() {
             fitView
             className="bg-slate-50"
             proOptions={{ hideAttribution: true }}
+            nodesDraggable={!isLocked}
+            nodesConnectable={!isLocked}
+            elementsSelectable={true}
           >
             <Background color="#94a3b8" gap={20} size={1} />
             <Controls className="!bg-white !shadow-xl !border-border" />
           </ReactFlow>
+          
+          {isLocked && (
+            <div className="absolute top-4 right-4 bg-orange-100 text-orange-800 px-3 py-1 rounded-md text-sm font-medium border border-orange-200 shadow-sm z-50 flex items-center gap-2">
+              <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
+              Network Locked
+            </div>
+          )}
         </div>
 
         {/* Properties Panel (Sidebar) */}
         <div 
           className={cn(
-            "h-full border-l border-border bg-card shadow-2xl z-20 flex flex-col transition-all duration-300 ease-in-out",
-            selectedElementId ? "w-[350px] opacity-100" : "w-0 opacity-0 overflow-hidden border-none"
+            "h-full border-l border-border bg-card shadow-2xl z-20 flex flex-col transition-all duration-300 ease-in-out overflow-hidden",
+            selectedElementId ? "w-[350px] opacity-100 visible" : "w-0 opacity-0 invisible"
           )}
         >
-          {selectedElementId && <PropertiesPanel />}
+          <div className="w-[350px] h-full">
+            {selectedElementId && <PropertiesPanel />}
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Designer() {
+  return (
+    <ReactFlowProvider>
+      <DesignerInner />
+    </ReactFlowProvider>
   );
 }
