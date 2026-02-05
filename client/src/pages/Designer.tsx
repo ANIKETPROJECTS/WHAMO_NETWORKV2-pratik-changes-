@@ -1,5 +1,15 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { 
+  PlusCircle, 
+  Circle, 
+  GitCommitHorizontal, 
+  Cylinder, 
+  ArrowRightCircle, 
+  Lock,
+  Unlock
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { 
   ReactFlow, 
   Background, 
   Controls, 
@@ -256,7 +266,7 @@ function DesignerInner() {
                 onClick={toggleLock}
                 title={isLocked ? "Unlock Network" : "Lock Network"}
               >
-                {isLocked ? <span className="text-lg">🔒</span> : <span className="text-lg">🔓</span>}
+                {isLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
               </Button>
             </div>
           </ReactFlow>
