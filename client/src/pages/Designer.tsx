@@ -4,9 +4,7 @@ import {
   Circle, 
   GitCommitHorizontal, 
   Cylinder, 
-  ArrowRightCircle, 
-  Lock,
-  Unlock
+  ArrowRightCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -66,9 +64,7 @@ function DesignerInner() {
     clearNetwork,
     deleteElement,
     selectedElementId,
-    selectedElementType,
-    isLocked,
-    toggleLock
+    selectedElementType
   } = useNetworkStore();
 
   useEffect(() => {
@@ -85,8 +81,6 @@ function DesignerInner() {
         zoomOut();
       } else if (event.key.toLowerCase() === 'f') {
         fitView();
-      } else if (event.key.toLowerCase() === 'l') {
-        toggleLock();
       } else if ((event.key === 'Delete' || event.key === 'Backspace') && 
           selectedElementId && 
           selectedElementType) {
@@ -96,27 +90,24 @@ function DesignerInner() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [deleteElement, selectedElementId, selectedElementType, zoomIn, zoomOut, fitView, toggleLock]);
+  }, [deleteElement, selectedElementId, selectedElementType, zoomIn, zoomOut, fitView]);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      if (isLocked) return;
       storeOnNodesChange(changes);
     },
-    [storeOnNodesChange, isLocked]
+    [storeOnNodesChange]
   );
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      if (isLocked) return;
       storeOnEdgesChange(changes);
     },
-    [storeOnEdgesChange, isLocked]
+    [storeOnEdgesChange]
   );
 
   const onConnect = useCallback(
     (params: Connection) => {
-      if (isLocked) return;
       if (params.source === params.target) {
         toast({
           variant: "destructive",
@@ -127,7 +118,7 @@ function DesignerInner() {
       }
       storeOnConnect(params);
     },
-    [storeOnConnect, toast, isLocked]
+    [storeOnConnect, toast]
   );
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
@@ -247,21 +238,14 @@ function DesignerInner() {
             fitView
             className="bg-slate-50"
             proOptions={{ hideAttribution: true }}
-            nodesDraggable={!isLocked}
-            nodesConnectable={!isLocked}
+            nodesDraggable={true}
+            nodesConnectable={true}
             elementsSelectable={true}
           >
             <Background color="#94a3b8" gap={20} size={1} />
             <Controls className="!bg-white !shadow-xl !border-border">
             </Controls>
           </ReactFlow>
-          
-          {isLocked && (
-            <div className="absolute top-4 right-4 bg-orange-100 text-orange-800 px-3 py-1 rounded-md text-sm font-medium border border-orange-200 shadow-sm z-50 flex items-center gap-2">
-              <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
-              Network Locked
-            </div>
-          )}
         </div>
 
         {/* Properties Panel (Sidebar) */}
